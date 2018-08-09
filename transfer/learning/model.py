@@ -57,3 +57,56 @@ def build_encoder_decoder(input_shape=(224, 224, 3)):
     output = Lambda(lambda a: (a + 1) * 127.5)(x)
 
     return Model(inputs=[input_tensor], outputs=[output])
+
+tmp_input_shape = (224, 224, 3)
+
+generated_model = build_encoder_decoder(input_shape=tmp_input_shape)
+
+# loss network
+
+from tensorflow.keras.applications.vgg16 import VGG16
+
+vgg16 = VGG16()
+
+
+# change settings no to train the model
+for layer in vgg16.layers:
+    layer.trainable = False
+
+
+def normalizer_vgg16(x):
+    """
+    do RGB -> BGR and asymptotically centralize
+    """
+    return (x[:, :, :, ::-1] - 120) / 255.
+
+
+# define the name of layers from which we try to extract the features 
+style_layer_names = (
+    'block1_conv2',
+    'block2_conv2',
+    'block3_conv3',
+    'block4_conv4'
+)
+
+contents_layer_names = (
+    'block3_conv3'
+)
+
+# list for keep the inner layer's output
+outputs_inner_style = []
+outputs_inner_contents = []
+
+generated_inputs = generated_model.output
+
+z = Lambda(normalizer_vgg16)(generated_inputs)
+
+for layer in vgg16.layers:
+    z = layer(z)
+    if layer.name in style_layer_names:
+        outputs_inner_style.append(z)
+    if layer.name in contents_layer_names:
+        outputs_inner_contents.append(z)
+
+model = Model(inputs=generated_model.input,
+    outputs=outputs_inner_style+outputs_inner_contents)
