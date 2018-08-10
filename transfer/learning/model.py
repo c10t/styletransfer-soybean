@@ -13,6 +13,10 @@ from tensorflow.keras.layers import Input
 from tensorflow.keras.layers import Lambda
 from tensorflow.keras.layers import Conv2DTranspose
 from tensorflow.keras.models import Model
+from tensorflow.keras.preprocessing.image import load_img
+from tensorflow.keras.preprocessing.image import img_to_array
+# from tensorflow.keras.preprocessing.image import array_to_img
+# from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 
 def residual_block(input_tensor):
@@ -121,12 +125,12 @@ model = Model(inputs=generated_model.input,
 # prepare answer
 tmp_input_size = tmp_input_shape[:2]
 
-style_image = load_img('img/style/sample.png', target_size=input_size)
+style_image = load_img('img/style/sample.png', target_size=tmp_input_size)
 
 array_style_image = np.expand_dims(img_to_array(style_image), axis=0)
 
 # define input layer
-input_style = Input(shape=input_shape, name='input_style')
+input_style = Input(shape=tmp_input_shape, name='input_style')
 
 style_outputs = []
 x = Lambda(normalizer_vgg16)(input_style)
