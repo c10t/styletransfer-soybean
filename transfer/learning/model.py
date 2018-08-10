@@ -1,3 +1,10 @@
+# import os
+# import glob
+# import math
+# import random
+
+import numpy as np
+
 from tensorflow.keras.layers import Activation
 from tensorflow.keras.layers import Add
 from tensorflow.keras.layers import Conv2D
@@ -110,3 +117,25 @@ for layer in vgg16.layers:
 
 model = Model(inputs=generated_model.input,
     outputs=outputs_inner_style+outputs_inner_contents)
+
+# prepare answer
+tmp_input_size = tmp_input_shape[:2]
+
+style_image = load_img('img/style/sample.png', target_size=input_size)
+
+array_style_image = np.expand_dims(img_to_array(style_image), axis=0)
+
+# define input layer
+input_style = Input(shape=input_shape, name='input_style')
+
+style_outputs = []
+x = Lambda(normalizer_vgg16)(input_style)
+
+for layer in vgg16.layers:
+    x = layer(x)
+    if layer.name in style_layer_names:
+        style_outputs.append(x)
+
+style_model = Model(inputs=input_style, outputs=style_outputs)
+
+y_true_style = style_model.predict(array_style_image)
