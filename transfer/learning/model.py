@@ -129,7 +129,7 @@ style_image = load_img('img/style/sample.png', target_size=tmp_input_size)
 
 array_style_image = np.expand_dims(img_to_array(style_image), axis=0)
 
-# define input layer
+# define style network
 input_style = Input(shape=tmp_input_shape, name='input_style')
 
 style_outputs = []
@@ -143,3 +143,19 @@ for layer in vgg16.layers:
 style_model = Model(inputs=input_style, outputs=style_outputs)
 
 y_true_style = style_model.predict(array_style_image)
+
+
+# define contents network
+input_contents = Input(size=tmp_input_shape, name='input_contents')
+
+contents_outputs = []
+y = Lambda(normalizer_vgg16)(input_contents)
+
+for layer in vgg16.layers:
+    y = layer(y)
+    if layer.name in contents_layer_names:
+        contents_outputs.append(y)
+
+contents_model = Model(inputs=input_contents, outputs=contents_outputs)
+
+
