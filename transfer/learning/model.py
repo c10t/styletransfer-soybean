@@ -1,6 +1,6 @@
-# import os
-# import glob
-# import math
+import os
+import glob
+import math
 # import random
 
 import numpy as np
@@ -159,3 +159,58 @@ for layer in vgg16.layers:
 contents_model = Model(inputs=input_contents, outputs=contents_outputs)
 
 
+# define generator
+
+def load_images(img_paths, target_size=(224, 224)):
+    """
+    :img_paths 
+    :return batches of arrays 
+    """
+    _load_img = lambda x: img_to_array(load_img(x, target_size))
+
+    img_list = [np.expand_dims(_load_img(path), axis=0) for path in img_paths]
+    return np.concatenate(img_list, axis=0)
+
+def train_data_generator(img_paths, batch_size, model, true_style, shuffle=True, epochs=None):
+    """
+    generate train data
+    """
+    n_samples = len(img_paths)
+    indices = list(range(n_samples))
+    steps_per_epoch = math.ceil(n_samples / batch_size)
+    img_paths = np.array(img_paths)
+    count_for_epoch = 0
+    while True:
+        count_for_epoch += 1
+        if shuffle:
+            np.random.shuffle(indices)
+        
+        for i in range(steps_per_epoch):
+            start = batch_size * i
+            end = batch_size * (i + 1)
+            X = load_images(img_paths[indices[start:end]])
+            batch_size_act = X.shape[0]
+            y_true_style_t = [np.repeat(feature, batch_size_act, axis=0)
+                for feature in true_style]
+
+            y_true_contents = model.predict(X)
+            yield(X, y_true_style_t + [y_true_contents])
+
+        if epochs is not None:
+            if count_for_epoch >= epochs:
+                raise StopIteration
+
+# create generator
+path_glob = os.path.join('img/context/*.jpg')
+tmp_image_paths = glob.glob(path.glob)
+
+tmp_batch_size = 2
+tmp_epochs = 10
+
+generator = train_data_generator(
+    tmp_image_paths,
+    tmp_batch_size,
+    contents_model,
+    y_true_style,
+    epochs=tmp_epochs
+)
