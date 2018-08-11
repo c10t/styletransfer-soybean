@@ -202,7 +202,7 @@ def train_data_generator(img_paths, batch_size, model, true_style, shuffle=True,
 
 # create generator
 path_glob = os.path.join('img/context/*.jpg')
-tmp_image_paths = glob.glob(path.glob)
+tmp_image_paths = glob.glob(path_glob)
 
 tmp_batch_size = 2
 tmp_epochs = 10
