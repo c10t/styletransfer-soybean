@@ -1,8 +1,8 @@
 version: "3.0"
 services:
   jupyter:
-    image: jupyter/datascience-notebook:latest
+    image: jupyter/tensorflow-notebook:latest
     ports: 
       - "7288:8888"
     volumes:
-      - ./transfer:/home/jovyan
+      - ./work:/home/jovyan/work
