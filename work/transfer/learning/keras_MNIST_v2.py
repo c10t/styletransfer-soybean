@@ -12,7 +12,7 @@ from ioutils import make_tensorboard
 np.random.seed(1671)  # for reproducibility
 
 NB_CLASSES = 10
-NB_EPOCH = 200
+NB_EPOCH = 20
 BATCH_SIZE = 128
 VERBOSE = 1
 OPTIMIZER = SGD()
@@ -40,14 +40,18 @@ Y_train = np_utils.to_categorical(y_train, NB_CLASSES)
 Y_test = np_utils.to_categorical(y_test,  NB_CLASSES)
 
 model = Sequential()
-model.add(Dense(NB_CLASSES, input_shape=(RESHAPED,)))
+model.add(Dense(N_HIDDEN, input_shape=(RESHAPED,)))
+model.add(Activation('relu'))
+model.add(Dense(N_HIDDEN))
+model.add(Activation('relu'))
+model.add(Dense(NB_CLASSES))
 model.add(Activation('softmax'))
 model.summary()
 
-callbacks = [make_tensorboard(set_dir_name='keras_MNIST_v2')]
-
 model.compile(loss='categorical_crossentropy',
               optimizer=OPTIMIZER, metrics=['accuracy'])
+
+callbacks = [make_tensorboard(set_dir_name='keras_MNIST_v2')]
 
 model.fit(X_train, Y_train, batch_size=BATCH_SIZE, epochs=NB_EPOCH,
           callbacks=callbacks, verbose=VERBOSE,

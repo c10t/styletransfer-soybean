@@ -3,3 +3,6 @@ __pycache__/
 
 # jupyter notebook
 .ipynb_checkpoints/
+
+# tensorboard result
+tb_*/
