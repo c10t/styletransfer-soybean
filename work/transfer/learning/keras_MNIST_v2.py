@@ -44,7 +44,7 @@ model.add(Dense(NB_CLASSES, input_shape=(RESHAPED,)))
 model.add(Activation('softmax'))
 model.summary()
 
-callbacks = [make_tensorboard(set_dir_name='keras_MNIST')]
+callbacks = [make_tensorboard(set_dir_name='keras_MNIST_v2')]
 
 model.compile(loss='categorical_crossentropy',
               optimizer=OPTIMIZER, metrics=['accuracy'])
