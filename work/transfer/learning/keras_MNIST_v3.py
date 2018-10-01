@@ -1,7 +1,7 @@
 import numpy as np
 
 from keras.datasets import mnist
-from keras.layers import Dense, Activation
+from keras.layers import Dense, Dropout, Activation
 from keras.models import Sequential
 from keras.optimizers import SGD
 from keras.utils import np_utils
@@ -18,6 +18,7 @@ VERBOSE = 1
 OPTIMIZER = SGD()
 N_HIDDEN = 128
 VALIDATION_SPLIT = 0.2
+DROPOUT = 0.3
 
 (X_train, y_train), (X_test, y_test) = mnist.load_data()
 
@@ -42,8 +43,10 @@ Y_test = np_utils.to_categorical(y_test,  NB_CLASSES)
 model = Sequential()
 model.add(Dense(N_HIDDEN, input_shape=(RESHAPED,)))
 model.add(Activation('relu'))
+model.add(Dropout(DROPOUT))
 model.add(Dense(N_HIDDEN))
 model.add(Activation('relu'))
+model.add(Dropout(DROPOUT))
 model.add(Dense(NB_CLASSES))
 model.add(Activation('softmax'))
 model.summary()
