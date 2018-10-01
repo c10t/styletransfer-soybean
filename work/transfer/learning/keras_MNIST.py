@@ -46,11 +46,11 @@ model.summary()
 
 callbacks = [make_tensorboard(set_dir_name='keras_MNIST')]
 
-model.compile(loss='categorical_crossentropy', 
+model.compile(loss='categorical_crossentropy',
               optimizer=OPTIMIZER, metrics=['accuracy'])
 
-model.fit(X_train, Y_train, batch_size=BATCH_SIZE, epochs=NB_EPOCH, 
-          callbacks=callbacks, verbose=VERBOSE, 
+model.fit(X_train, Y_train, batch_size=BATCH_SIZE, epochs=NB_EPOCH,
+          callbacks=callbacks, verbose=VERBOSE,
           validation_split=VALIDATION_SPLIT)
 
 score = model.evaluate(X_test, Y_test, verbose=VERBOSE)
