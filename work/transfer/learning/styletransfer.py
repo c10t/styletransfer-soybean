@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import argparse
 import os
 
 import numpy as np
@@ -11,6 +12,9 @@ from urllib.request import urlretrieve
 from keras.preprocessing.image import load_img, img_to_array
 from keras.applications import vgg19
 from keras import backend as K
+
+
+DESCRIPTION = """Learn and create a style-transferred image."""
 
 
 class TransferDefinition():
@@ -163,19 +167,28 @@ def main(content_image_path, style_image_path, iter_count=10,
 
 
 if __name__ == '__main__':
-    # TODO: use argparse
-    image_url = "X"
+    parser = argparse.ArgumentParser(description=DESCRIPTION)
+    parser.add_argument("-c", "--content", metavar="URL", action="store")
+    parser.add_argument("-s", "--style", metavar="URL", action="store")
+
+    args = parser.parse_args()
+
+    # TODO: treat None
+    # "if args.content is None or args.style is None:""
+    # or required=True on add_argument
+
+    content_image_url = args.content
     content_path = os.path.join(
       os.path.dirname(__file__),
       "data/content.jpg"
     )
-    urlretrieve(image_url, content_path)
+    urlretrieve(content_image_url, content_path)
 
-    image_url = "Y"
+    style_image_url = args.style
     style_path = os.path.join(
       os.path.dirname(__file__),
       "data/style.jpg"
     )
-    urlretrieve(image_url, style_path)
+    urlretrieve(style_image_url, style_path)
 
     main(content_path, style_path)
