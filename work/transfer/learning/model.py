@@ -5,6 +5,7 @@ import math
 
 import numpy as np
 
+from tensorflow.keras.applications.vgg16 import VGG16
 from tensorflow.keras.layers import Activation
 from tensorflow.keras.layers import Add
 from tensorflow.keras.layers import Conv2D
@@ -50,7 +51,7 @@ def build_encoder_decoder(input_shape=(224, 224, 3)):
     # add 5 residual blocks
     for _ in range(5):
         x = residual_block(x)
-    
+
     # Decoder part
     x = Conv2DTranspose(64, (3, 3), strides=2, padding='same')(x)
     x = BatchNormalization()(x)
@@ -69,14 +70,12 @@ def build_encoder_decoder(input_shape=(224, 224, 3)):
 
     return Model(inputs=[input_tensor], outputs=[output])
 
+
 tmp_input_shape = (224, 224, 3)
 
 generated_model = build_encoder_decoder(input_shape=tmp_input_shape)
 
 # loss network
-
-from tensorflow.keras.applications.vgg16 import VGG16
-
 vgg16 = VGG16()
 
 
@@ -92,7 +91,7 @@ def normalizer_vgg16(x):
     return (x[:, :, :, ::-1] - 120) / 255.
 
 
-# define the name of layers from which we try to extract the features 
+# define the name of layers from which we try to extract the features
 style_layer_names = (
     'block1_conv2',
     'block2_conv2',
@@ -119,8 +118,10 @@ for layer in vgg16.layers:
     if layer.name in contents_layer_names:
         outputs_inner_contents.append(z)
 
-model = Model(inputs=generated_model.input,
-    outputs=outputs_inner_style+outputs_inner_contents)
+model = Model(
+  inputs=generated_model.input,
+  outputs=outputs_inner_style+outputs_inner_contents
+)
 
 # prepare answer
 tmp_input_size = tmp_input_shape[:2]
@@ -163,15 +164,18 @@ contents_model = Model(inputs=input_contents, outputs=contents_outputs)
 
 def load_images(img_paths, target_size=(224, 224)):
     """
-    :img_paths 
-    :return batches of arrays 
+    :img_paths
+    :return batches of arrays
     """
-    _load_img = lambda x: img_to_array(load_img(x, target_size))
-
-    img_list = [np.expand_dims(_load_img(path), axis=0) for path in img_paths]
+    img_list = [
+      np.expand_dims(img_to_array(load_img(path, target_size)), axis=0)
+      for path in img_paths
+    ]
     return np.concatenate(img_list, axis=0)
 
-def train_data_generator(img_paths, batch_size, model, true_style, shuffle=True, epochs=None):
+
+def train_data_generator(img_paths, batch_size, model,
+                         true_style, shuffle=True, epochs=None):
     """
     generate train data
     """
@@ -184,14 +188,14 @@ def train_data_generator(img_paths, batch_size, model, true_style, shuffle=True,
         count_for_epoch += 1
         if shuffle:
             np.random.shuffle(indices)
-        
+
         for i in range(steps_per_epoch):
             start = batch_size * i
             end = batch_size * (i + 1)
             X = load_images(img_paths[indices[start:end]])
             batch_size_act = X.shape[0]
             y_true_style_t = [np.repeat(feature, batch_size_act, axis=0)
-                for feature in true_style]
+                              for feature in true_style]
 
             y_true_contents = model.predict(X)
             yield(X, y_true_style_t + [y_true_contents])
@@ -199,6 +203,7 @@ def train_data_generator(img_paths, batch_size, model, true_style, shuffle=True,
         if epochs is not None:
             if count_for_epoch >= epochs:
                 raise StopIteration
+
 
 # create generator
 path_glob = os.path.join('img/context/*.jpg')
